@@ -34,7 +34,7 @@ export default function Navbar() {
                     className="flex items-center gap-4 group cursor-pointer"
                     onClick={replayLogo}
                 >
-                    <FormalBridgeLogo key={logoKey} size={36} animated={true} />
+                    <FormalBridgeLogo key={logoKey} size={48} />
                     <h1 className="text-lg font-bold tracking-[0.15em] text-white group-hover:text-teal transition-colors">
                         FORMAL BRIDGE
                     </h1>

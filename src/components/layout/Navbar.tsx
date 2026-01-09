@@ -34,24 +34,24 @@ export default function Navbar() {
                     className="flex items-center gap-4 group cursor-pointer"
                     onClick={replayLogo}
                 >
-                    <FormalBridgeLogo key={logoKey} size={48} />
-                    <h1 className="text-lg font-bold tracking-[0.15em] text-white group-hover:text-teal transition-colors">
+                    <FormalBridgeLogo key={logoKey} size={64} animated={true} />
+                    <h1 className="text-2xl font-bold tracking-[0.15em] text-white group-hover:text-teal transition-colors">
                         FORMAL BRIDGE
                     </h1>
                 </Link>
 
                 {/* Desktop Nav */}
-                <div className="hidden md:flex items-center gap-8">
+                <div className="hidden md:flex items-center gap-10">
                     <Link
                         href="#platform"
-                        className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors relative group"
+                        className="text-sm font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors relative group"
                     >
                         Platform
                         <span className="absolute -bottom-2 left-0 w-full h-[2px] bg-teal scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                     </Link>
                     <Link
                         href="#expertise"
-                        className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors relative group"
+                        className="text-sm font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors relative group"
                     >
                         The Science
                         <span className="absolute -bottom-2 left-0 w-full h-[2px] bg-teal scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
@@ -59,16 +59,16 @@ export default function Navbar() {
                 </div>
 
                 {/* Auth CTA - Simple login/portal links */}
-                <div className="hidden md:flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-6">
                     <Link
                         href="/login"
-                        className="px-5 py-2 text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors"
+                        className="px-6 py-3 text-slate-400 text-sm font-bold uppercase tracking-widest hover:text-white transition-colors"
                     >
                         Sign In
                     </Link>
                     <Link
                         href="/signup"
-                        className="px-5 py-2 border border-teal/30 bg-teal/10 text-teal text-xs font-bold uppercase tracking-widest hover:bg-teal hover:text-midnight transition-all"
+                        className="px-8 py-3 border border-teal/30 bg-teal/10 text-teal text-sm font-bold uppercase tracking-widest hover:bg-teal hover:text-midnight transition-all"
                     >
                         Get Started
                     </Link>

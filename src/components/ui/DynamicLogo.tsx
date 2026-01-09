@@ -1,242 +1,242 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { TOKENS, LogoProps, V, T, SharedDefs, cx, cy, tr } from "./logo-shared";
+import React, { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
 
-/**
- * VERSION 1: "Sequential Build" (Canonical Approach)
- * The baseline professional reveal. Wireframe draws sequentially,
- * then solid tetrahedron materializes with spring physics.
- * 
- * Best for: Main website header, app loading screen.
- */
+// --- DESIGN TOKENS ---
+const TOKENS = {
+    colors: {
+        teal: 0x00d4aa,
+        tealHex: '#00d4aa',
+        platinum: 0xe0e0e0,
+        platinumHex: '#f0f0f0',
+        bg: '#0a0e1a',
+        bgNum: 0x0a0e1a
+    },
+};
+
+// --- THREE.JS ENGINE COMPONENT ---
+interface ThreeDLogoProps {
+    mode?: 'standard' | 'counter' | 'orbit' | 'sync' | 'glitch';
+    active?: boolean;
+}
+
+const ThreeDLogo = ({ mode = 'standard', active = false }: ThreeDLogoProps) => {
+    const mountRef = useRef<HTMLDivElement>(null);
+    const requestRef = useRef<number>(0);
+    const sceneRef = useRef<THREE.Scene | null>(null);
+
+    useEffect(() => {
+        if (!mountRef.current) return;
+
+        // 1. Scene Setup
+        const width = mountRef.current.clientWidth;
+        const height = mountRef.current.clientHeight;
+
+        const scene = new THREE.Scene();
+        sceneRef.current = scene;
+
+        // Orthographic camera often looks better for logos, but perspective was requested in snippet
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.z = 5;
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance"
+        });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap pixel ratio for performance
+        mountRef.current.appendChild(renderer.domElement);
+
+        // 2. Lighting (Crucial for the "Platinum" finish)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+        mainLight.position.set(5, 5, 5);
+        scene.add(mainLight);
+
+        const tealPointLight = new THREE.PointLight(TOKENS.colors.teal, 2, 10);
+        tealPointLight.position.set(-2, -2, 2);
+        scene.add(tealPointLight);
+
+        // 3. The "Verification Matrix" (Wireframe Cube)
+        const cubeSize = 2;
+        const cubeGeom = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+        const cubeEdges = new THREE.EdgesGeometry(cubeGeom);
+        const cubeMat = new THREE.LineBasicMaterial({
+            color: TOKENS.colors.teal,
+            transparent: true,
+            opacity: 0.8,
+            linewidth: 2
+        });
+        const cube = new THREE.LineSegments(cubeEdges, cubeMat);
+        scene.add(cube);
+
+        // Vertex Nodes (Data Points)
+        const nodeGeom = new THREE.SphereGeometry(0.04, 8, 8);
+        const nodeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        // Use position attribute to place spheres
+        const posAttribute = cubeGeom.attributes.position;
+        for (let i = 0; i < posAttribute.count; i++) {
+            const x = posAttribute.getX(i);
+            const y = posAttribute.getY(i);
+            const z = posAttribute.getZ(i);
+
+            // Check if we already have a sphere here (BoxGeometry duplicates vertices for faces)
+            // Simple workaround: just add them, performance impact is negligible for 8-24 vertices
+            const sphere = new THREE.Mesh(nodeGeom, nodeMat);
+            sphere.position.set(x, y, z);
+            cube.add(sphere);
+        }
+        // Clean up duplicate spheres if we want perfection, but visually fine. 
+        // Actually BoxGeometry has 24 verts. EdgesGeometry handles the lines.
+
+        // 4. The "Proof Core" (Solid Tetrahedron)
+        const tetraGeom = new THREE.TetrahedronGeometry(0.9);
+        const tetraMat = new THREE.MeshStandardMaterial({
+            color: TOKENS.colors.platinum,
+            metalness: 0.9,
+            roughness: 0.1,
+            flatShading: true
+        });
+        const tetrahedron = new THREE.Mesh(tetraGeom, tetraMat);
+        scene.add(tetrahedron);
+
+        // Outline for tetrahedron to sharpen its look
+        const tetraEdges = new THREE.EdgesGeometry(tetraGeom);
+        const tetraLine = new THREE.LineSegments(tetraEdges, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.3, transparent: true }));
+        tetrahedron.add(tetraLine);
+
+        // 5. Animation Loop
+        let frame = 0;
+        const animate = () => {
+            frame += 0.01;
+
+            switch (mode) {
+                case 'counter':
+                    cube.rotation.y += 0.005;
+                    cube.rotation.x += 0.002;
+                    tetrahedron.rotation.y -= 0.015;
+                    tetrahedron.rotation.z += 0.005;
+                    break;
+
+                case 'orbit':
+                    cube.rotation.y = Math.sin(frame * 0.5) * 0.5;
+                    cube.rotation.x = Math.cos(frame * 0.3) * 0.5;
+                    tetrahedron.rotation.y = frame * 2;
+                    tetrahedron.position.y = Math.sin(frame) * 0.1;
+                    break;
+
+                case 'sync':
+                    cube.rotation.y += 0.01;
+                    cube.rotation.x = 0.5;
+                    tetrahedron.rotation.y += 0.01;
+                    tetrahedron.rotation.x = 0.5;
+                    break;
+
+                case 'glitch':
+                    if (Math.random() > 0.98) {
+                        cube.rotation.x = Math.random() * Math.PI;
+                        cube.rotation.y = Math.random() * Math.PI;
+                    } else {
+                        cube.rotation.y += 0.002;
+                    }
+                    tetrahedron.rotation.y += 0.05;
+                    break;
+
+                default:
+                    // Standard "Diamond Stance" Drift
+                    cube.rotation.y += 0.005;
+                    cube.rotation.x = 0.6;
+                    cube.rotation.z = 0.6; // Diamond tilt
+                    tetrahedron.rotation.y -= 0.01;
+            }
+
+            renderer.render(scene, camera);
+            requestRef.current = requestAnimationFrame(animate);
+        };
+
+        animate();
+
+        // Handle Resize
+        const handleResize = () => {
+            if (!mountRef.current) return;
+            const w = mountRef.current.clientWidth;
+            const h = mountRef.current.clientHeight;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        };
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            cancelAnimationFrame(requestRef.current);
+            if (mountRef.current && renderer.domElement) {
+                mountRef.current.removeChild(renderer.domElement);
+            }
+            // Cleanup Three.js resources
+            renderer.dispose();
+            cubeGeom.dispose();
+            cubeMat.dispose();
+            nodeGeom.dispose();
+            nodeMat.dispose();
+            tetraGeom.dispose();
+            tetraMat.dispose();
+        };
+    }, [mode]);
+
+    return <div ref={mountRef} className="w-full h-full pointer-events-none" />;
+};
+
+// --- MAIN EXPORT WRAPPER ---
+interface LogoProps {
+    size?: number;
+    animated?: boolean;
+    className?: string;
+    mode?: 'standard' | 'counter' | 'orbit' | 'sync' | 'glitch';
+}
+
 export default function FormalBridgeLogo({
-    size = 80,
+    size = 64,
+    animated = true,
     className = "",
-    startDelay = 0
+    mode = 'standard'
 }: LogoProps) {
-    // Animation Variants
-    const wireframeDraw = {
-        hidden: { pathLength: 0, opacity: 0 },
-        visible: (i: number) => ({
-            pathLength: 1,
-            opacity: 1,
-            transition: {
-                delay: startDelay + i * 0.15,
-                duration: 0.7,
-                ease: "easeInOut" as const
-            }
-        })
-    };
+    // If not animated, we could fallback to StaticLogo, but let's assume if they use this component they want the 3D canvas unless explicitly minimal.
+    // However, keeping React/Three overhead low for lists is good.
+    // For now, render ThreeDLogo if animated.
 
-    const nodePop = {
-        hidden: { scale: 0 },
-        visible: (i: number) => ({
-            scale: 1,
-            transition: {
-                delay: startDelay + 0.6 + i * 0.05,
-                type: "spring" as const,
-                stiffness: 300
-            }
-        })
-    };
-
-    const solidAppear = {
-        hidden: { scale: 0.8, opacity: 0, y: 10 },
-        visible: {
-            scale: 1,
-            opacity: 1,
-            y: 0,
-            transition: {
-                delay: startDelay + 1.4,
-                type: "spring" as const,
-                stiffness: 120,
-                damping: 10,
-                mass: 1.5
-            }
-        }
-    };
-
-    const shineSweep = {
-        hidden: { x: "-100%", opacity: 0 },
-        visible: {
-            x: "200%",
-            opacity: [0, 0.8, 0],
-            transition: {
-                delay: startDelay + 1.8,
-                duration: 1.2,
-                ease: "easeInOut" as const
-            }
-        }
-    };
+    if (!animated) {
+        return <StaticLogo size={size} />;
+    }
 
     return (
-        <div className={`relative ${className}`} style={{ width: size, height: size }}>
-            <motion.svg
-                width="100%"
-                height="100%"
-                viewBox="0 0 100 100"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                animate="visible"
-                initial="hidden"
-            >
-                <SharedDefs />
-
-                {/* --- WIREFRAME --- */}
-                <motion.g
-                    stroke={TOKENS.colors.teal}
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    filter="url(#teal-bloom)"
-                    strokeOpacity={0.8}
-                >
-                    {/* Back/Inner Lines (drawn first) */}
-                    <motion.path d={`M ${V.tl.x} ${V.tl.y} L ${V.c.x} ${V.c.y}`} variants={wireframeDraw} custom={0} opacity={0.5} />
-                    <motion.path d={`M ${V.tr.x} ${V.tr.y} L ${V.c.x} ${V.c.y}`} variants={wireframeDraw} custom={1} opacity={0.5} />
-                    <motion.path d={`M ${V.btm.x} ${V.btm.y} L ${V.c.x} ${V.c.y}`} variants={wireframeDraw} custom={2} opacity={0.5} />
-                    {/* Outer Hexagon */}
-                    <motion.path
-                        d={`M ${V.top.x} ${V.top.y} L ${V.tr.x} ${V.tr.y} L ${V.br.x} ${V.br.y} L ${V.btm.x} ${V.btm.y} L ${V.bl.x} ${V.bl.y} L ${V.tl.x} ${V.tl.y} Z`}
-                        variants={wireframeDraw}
-                        custom={3}
-                    />
-                    {/* Front spokes connecting to center */}
-                    <motion.path d={`M ${V.c.x} ${V.c.y} L ${V.top.x} ${V.top.y}`} variants={wireframeDraw} custom={4} />
-                    <motion.path d={`M ${V.c.x} ${V.c.y} L ${V.br.x} ${V.br.y}`} variants={wireframeDraw} custom={5} />
-                    <motion.path d={`M ${V.c.x} ${V.c.y} L ${V.bl.x} ${V.bl.y}`} variants={wireframeDraw} custom={6} />
-                </motion.g>
-
-                {/* Nodes at Vertices */}
-                {[V.top, V.tr, V.br, V.btm, V.bl, V.tl].map((pt, i) => (
-                    <motion.circle
-                        key={i}
-                        cx={pt.x}
-                        cy={pt.y}
-                        r={2}
-                        fill={TOKENS.colors.teal}
-                        variants={nodePop}
-                        custom={i}
-                    />
-                ))}
-
-                {/* --- SOLID TETRAHEDRON CORE --- */}
-                <motion.g variants={solidAppear} style={{ originX: '50%', originY: '50%' }}>
-                    {/* Clip for shine effect */}
-                    <defs>
-                        <clipPath id="tetra-clip">
-                            <path d={`M ${T.apex.x} ${T.apex.y} L ${T.br.x} ${T.br.y} L ${T.bl.x} ${T.bl.y} Z`} />
-                        </clipPath>
-                    </defs>
-
-                    {/* Faces with proper shading */}
-                    {/* Right (Mid) Face */}
-                    <path d={`M ${T.apex.x} ${T.apex.y} L ${T.br.x} ${T.br.y} L ${T.back.x} ${T.back.y} Z`} fill={TOKENS.colors.platMid} />
-                    {/* Left (Dark) Face */}
-                    <path d={`M ${T.apex.x} ${T.apex.y} L ${T.bl.x} ${T.bl.y} L ${T.back.x} ${T.back.y} Z`} fill={TOKENS.colors.platDark} />
-                    {/* Front (Brightest) Face */}
-                    <path d={`M ${T.apex.x} ${T.apex.y} L ${T.br.x} ${T.br.y} L ${T.bl.x} ${T.bl.y} Z`} fill={TOKENS.colors.platBright} />
-
-                    {/* Edge Highlights */}
-                    <path
-                        d={`M ${T.apex.x} ${T.apex.y} L ${T.br.x} ${T.br.y} M ${T.apex.x} ${T.apex.y} L ${T.bl.x} ${T.bl.y} M ${T.bl.x} ${T.bl.y} L ${T.br.x} ${T.br.y}`}
-                        stroke="white"
-                        strokeWidth="0.5"
-                        opacity={0.7}
-                        fill="none"
-                    />
-
-                    {/* Platinum Shine Effect */}
-                    <motion.rect
-                        x="0"
-                        y="0"
-                        width="100"
-                        height="100"
-                        fill="url(#plat-metal-shine)"
-                        clipPath="url(#tetra-clip)"
-                        variants={shineSweep}
-                        style={{ mixBlendMode: 'overlay' }}
-                    />
-                </motion.g>
-            </motion.svg>
+        <div style={{ width: size, height: size }} className={`relative ${className}`}>
+            <ThreeDLogo mode={mode} active={true} />
         </div>
     );
 }
 
-
-/**
- * VERSION 5: "The Living Matrix" (Subtle Pulse)
- * Subtle, persistent state. The logo gently "breathes."
- * 
- * Best for: Footers, navigation bars, static contexts.
- */
-export function StaticLogo({ size = 24, className = "" }: { size?: number; className?: string }) {
+// --- STATIC EXPORT FOR PDF/FOOTER ---
+// Reusing the vectorized SVG version for static contexts where WebGL is overkill
+export function StaticLogo({ size = 24 }: { size?: number }) {
     return (
-        <motion.div className={className} style={{ width: size, height: size }}>
-            <motion.svg
-                width="100%"
-                height="100%"
-                viewBox="0 0 100 100"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <SharedDefs />
-
-                {/* --- WIREFRAME CAGE (Breathing) --- */}
-                <motion.g
-                    animate={{
-                        scale: [1, 1.03, 1],
-                        opacity: [0.8, 1, 0.8],
-                    }}
-                    transition={{ duration: 4, ease: "easeInOut", repeat: Infinity }}
-                    style={{ originX: '50%', originY: '50%' }}
-                    stroke={TOKENS.colors.teal}
-                    strokeWidth="1.5"
-                    filter="url(#teal-bloom)"
-                >
-                    <path
-                        d={`M ${V.top.x} ${V.top.y} L ${V.tr.x} ${V.tr.y} L ${V.br.x} ${V.br.y} L ${V.btm.x} ${V.btm.y} L ${V.bl.x} ${V.bl.y} L ${V.tl.x} ${V.tl.y} Z`}
-                        fill="none"
-                    />
-                    <path
-                        d={`M ${V.c.x} ${V.c.y} L ${V.top.x} ${V.top.y} M ${V.c.x} ${V.c.y} L ${V.bl.x} ${V.bl.y} M ${V.c.x} ${V.c.y} L ${V.br.x} ${V.br.y}`}
-                        opacity={0.5}
-                        fill="none"
-                    />
-                    {/* Nodes */}
-                    {[V.top, V.tr, V.br, V.btm, V.bl, V.tl].map((pt, i) => (
-                        <circle key={i} cx={pt.x} cy={pt.y} r={1.5} fill="white" />
-                    ))}
-                </motion.g>
-
-                {/* --- SOLID CORE (Stable but gleams) --- */}
-                <g>
-                    <path d={`M ${T.apex.x} ${T.apex.y} L ${T.bl.x} ${T.bl.y} L ${T.back.x} ${T.back.y} Z`} fill={TOKENS.colors.platDark} />
-                    <path d={`M ${T.apex.x} ${T.apex.y} L ${T.br.x} ${T.br.y} L ${T.back.x} ${T.back.y} Z`} fill={TOKENS.colors.platMid} />
-                    <path d={`M ${T.apex.x} ${T.apex.y} L ${T.br.x} ${T.br.y} L ${T.bl.x} ${T.bl.y} Z`} fill={TOKENS.colors.platBright} />
-                    {/* Pulsing Edge Highlight */}
-                    <motion.path
-                        d={`M ${T.apex.x} ${T.apex.y} L ${T.bl.x} ${T.bl.y} M ${T.apex.x} ${T.apex.y} L ${T.br.x} ${T.br.y}`}
-                        stroke="white"
-                        fill="none"
-                        animate={{
-                            strokeOpacity: [0.3, 1, 0.3],
-                            strokeWidth: [0.5, 1.5, 0.5],
-                        }}
-                        transition={{ duration: 3, ease: "easeInOut", repeat: Infinity, delay: 0.5 }}
-                    />
-                </g>
-            </motion.svg>
-        </motion.div>
+        <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 18 L79 34 L79 66 L50 82 L21 66 L21 34 Z" stroke="#00d4aa" strokeWidth="2" fill="none" />
+            <path d="M50 50 L50 18 M50 50 L79 66 M50 50 L21 66" stroke="#00d4aa" strokeWidth="2" opacity="0.7" />
+            <path d="M50 35 L36 58 L50 65 Z" fill="#cbd5e1" />
+            <path d="M50 35 L64 58 L50 65 Z" fill="#64748b" />
+        </svg>
     );
 }
 
-
 // --- SVG STRING FOR PDF GENERATION ---
 export const logoSvgString = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <path d="M50 15 L80.3 32.5 L80.3 67.5 L50 85 L19.7 67.5 L19.7 32.5 Z" stroke="#00d4aa" stroke-width="2" fill="none"/>
-  <path d="M50 50 L50 15 M50 50 L80.3 67.5 M50 50 L19.7 67.5" stroke="#00d4aa" stroke-width="2" fill="none" opacity="0.6"/>
-  <path d="M50 36.25 L36.4 59.13 L50 59.13 Z" fill="#888888"/>
-  <path d="M50 36.25 L63.6 59.13 L50 59.13 Z" fill="#c0c0c0"/>
-  <path d="M50 36.25 L63.6 59.13 L36.4 59.13 Z" fill="#f0f0f0"/>
+  <path d="M50 18 L79 34 L79 66 L50 82 L21 66 L21 34 Z" stroke="#00d4aa" stroke-width="2" fill="none"/>
+  <path d="M50 50 L50 18 M50 50 L79 66 M50 50 L21 66" stroke="#00d4aa" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M50 35 L36 58 L50 65 Z" fill="#cbd5e1"/>
+  <path d="M50 35 L64 58 L50 65 Z" fill="#64748b"/>
 </svg>`;

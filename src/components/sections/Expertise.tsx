@@ -45,7 +45,7 @@ export default function Expertise() {
                                 animate={isInView ? { opacity: 1 } : {}}
                                 transition={{ delay: 0.3 }}
                             >
-                                Theodore S.
+                                Theodore
                             </motion.h3>
                             <motion.p
                                 className="text-teal font-mono text-xs tracking-[0.2em] uppercase mt-1"
@@ -73,23 +73,7 @@ export default function Expertise() {
                             </p>
                         </motion.blockquote>
 
-                        {/* Cambridge Badge */}
-                        <motion.div
-                            className="pt-4"
-                            initial={{ opacity: 0 }}
-                            animate={isInView ? { opacity: 1 } : {}}
-                            transition={{ delay: 0.6 }}
-                        >
-                            <div className="inline-block border border-slate-700/50 px-4 py-2">
-                                <span className="text-xs text-slate-500 font-mono tracking-wide">
-                                    CAMBRIDGE MATHEMATICAL TRIPOS
-                                </span>
-                                <span className="text-slate-700 mx-2">|</span>
-                                <span className="text-xs text-slate-600 font-light">
-                                    Pure Mathematics & Formal Methods
-                                </span>
-                            </div>
-                        </motion.div>
+
                     </motion.div>
 
                     {/* Right: Why Formal Methods */}

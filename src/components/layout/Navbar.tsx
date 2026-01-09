@@ -1,21 +1,50 @@
 "use client";
 
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { User } from "lucide-react";
 import FormalBridgeLogo from "@/components/ui/DynamicLogo";
+import { createClient } from "@/lib/supabase/browser";
 
 export default function Navbar() {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
     const [logoKey, setLogoKey] = useState(0);
+    const [user, setUser] = useState<{ email: string } | null>(null);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+    const supabase = createClient();
+
+    // Check auth state on mount
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user ? { email: user.email || '' } : null);
+            setLoading(false);
+        };
+        checkUser();
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ? { email: session.user.email || '' } : null);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [supabase.auth]);
 
     useMotionValueEvent(scrollY, "change", (latest) => {
         setIsScrolled(latest > 50);
     });
 
-    // Replay logo animation on click
     const replayLogo = () => setLogoKey(prev => prev + 1);
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        setUser(null);
+        router.push('/');
+    };
 
     return (
         <motion.nav
@@ -58,20 +87,42 @@ export default function Navbar() {
                     </Link>
                 </div>
 
-                {/* Auth CTA - Simple login/portal links */}
+                {/* Auth Section */}
                 <div className="hidden md:flex items-center gap-6">
-                    <Link
-                        href="/login"
-                        className="px-6 py-3 text-slate-400 text-sm font-bold uppercase tracking-widest hover:text-white transition-colors"
-                    >
-                        Sign In
-                    </Link>
-                    <Link
-                        href="/signup"
-                        className="px-8 py-3 border border-teal/30 bg-teal/10 text-teal text-sm font-bold uppercase tracking-widest hover:bg-teal hover:text-midnight transition-all"
-                    >
-                        Get Started
-                    </Link>
+                    {loading ? (
+                        <div className="w-24 h-10 bg-slate-800/50 rounded animate-pulse" />
+                    ) : user ? (
+                        <>
+                            <Link
+                                href="/portal"
+                                className="px-6 py-3 text-teal text-sm font-bold uppercase tracking-widest hover:text-white transition-colors flex items-center gap-2"
+                            >
+                                <User className="w-4 h-4" />
+                                Portal
+                            </Link>
+                            <button
+                                onClick={handleSignOut}
+                                className="px-6 py-3 border border-slate-700 text-slate-400 text-sm font-bold uppercase tracking-widest hover:border-red-500/50 hover:text-red-400 transition-all"
+                            >
+                                Sign Out
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                href="/login"
+                                className="px-6 py-3 text-slate-400 text-sm font-bold uppercase tracking-widest hover:text-white transition-colors"
+                            >
+                                Sign In
+                            </Link>
+                            <Link
+                                href="/signup"
+                                className="px-8 py-3 border border-teal/30 bg-teal/10 text-teal text-sm font-bold uppercase tracking-widest hover:bg-teal hover:text-midnight transition-all"
+                            >
+                                Get Started
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
         </motion.nav>

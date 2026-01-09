@@ -1,0 +1,23 @@
+[build]
+  command = "npm run build"
+  # publish is omitted to let the Next.js Runtime handle it
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_USE_NETLIFY_EDGE = "true"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://insolvencylib-api.fly.dev/api/:splat"
+  status = 200
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

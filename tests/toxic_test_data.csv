@@ -1,0 +1,24 @@
+Creditor Name,Claim Amount,Tier
+HMRC Corporation Tax,847520,Unsecured
+Barclays Bank (Fixed Charge),2500000,Secured
+Employee Wages - J. Smith,1250,Unsecured
+Trade Supplier A,TBC,Unsecured
+VAT Liability Q4,156000,Unsecured
+Pension Arrears,89340,Preferential
+Holiday Inn Conference,12500,Unsecured
+Landlord Arrears,£48,000 approx,Unsecured
+Professional Fees (See Note 4),95000,Expense
+National Insurance Contributions,67800,Unsecured
+Employee Redundancy - M. Jones,650,Unsecured
+Trade Supplier B,(5000),Unsecured
+Crown Revenue & Customs,125000,Unsecured
+Wages Arrears - Staff,800,Unsecured
+Unknown Creditor,pending,Unsecured
+Müller GmbH,15000,Unsecured
+Test Company Ltd,0,Unsecured
+Duplicate Supplier,10000,Unsecured
+Duplicate Supplier,10000,Unsecured
+PAYE Settlement,45000,Unsecured
+Statutory Holiday Pay,720,Unsecured
+,25000,Unsecured
+Very Large Claim,999999999.99,Unsecured

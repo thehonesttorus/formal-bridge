@@ -1,0 +1,77 @@
+/* Fonts loaded via next/font in layout.tsx */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-midnight text-white antialiased;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-midnight;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-navy-700 rounded-full border-2 border-midnight;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-navy-600;
+  }
+}
+
+@layer components {
+  .section {
+    @apply max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-24 sm:py-32;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-slate-200 to-slate-400;
+  }
+
+  /* Glass Cards - "Institutional" feel */
+  .glass-card {
+    @apply relative overflow-hidden rounded-2xl border border-navy-700 bg-navy-800/60 backdrop-blur-xl transition-all duration-300;
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+  }
+
+  .glass-card:hover {
+    @apply border-teal/30 bg-navy-800/80 -translate-y-1;
+    box-shadow: 0 20px 40px -4px rgba(0, 0, 0, 0.4), 0 0 20px -4px rgba(0, 212, 170, 0.1);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply relative inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold tracking-wide text-midnight uppercase bg-teal rounded-lg overflow-hidden transition-all duration-300;
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 30px rgba(0, 212, 170, 0.4);
+    transform: scale(1.02);
+  }
+
+  .btn-secondary {
+    @apply relative inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold tracking-wide text-white uppercase bg-transparent border border-navy-600 rounded-lg overflow-hidden transition-all duration-300;
+  }
+
+  .btn-secondary:hover {
+    @apply border-teal text-teal bg-teal/5;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+}

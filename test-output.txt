@@ -1,0 +1,219 @@
+npm warn Unknown project config "ipv4". This will stop working in the next major version of npm.
+FAIL tests/airlock.test.ts
+  Data Sanitization
+    sanitizeAmount
+      ÔêÜ strips currency symbols: ┬ú10,500.50 ÔåÆ 10500.50 (3 ms)
+      ÔêÜ strips euro symbols: Ôé¼5,000 ÔåÆ 5000 (1 ms)
+      ÔêÜ handles plain numbers: 12345 ÔåÆ 12345 (1 ms)
+      ÔêÜ blocks "TBC" with blocking warning
+      ÔêÜ blocks "approx" values (1 ms)
+      ÔêÜ blocks "See Note" references (3 ms)
+      ÔêÜ blocks "pending" values
+      ÔêÜ converts parentheses to negative: (5000) ÔåÆ -5000 (1 ms)
+      ÔêÜ warns on zero amounts (1 ms)
+      ÔêÜ handles empty string as invalid (1 ms)
+      ÔêÜ handles null as invalid (1 ms)
+      ÔêÜ handles very large amounts
+    detectDuplicates
+      ÔêÜ detects exact duplicates (same name + same amount) (17 ms)
+      ÔêÜ does not flag different amounts as duplicates (1 ms)
+    generateIntegrityReport
+      ÔêÜ counts blocking issues correctly
+      ÔêÜ allows proceeding when no blocking issues (1 ms)
+  Crown Preference Detection
+    analyzeClassifications
+      ÔêÜ flags HMRC in Tier 6 as misclassified (2 ms)
+      ÔêÜ flags VAT in Tier 6 as misclassified
+      ÔêÜ flags PAYE in Tier 6 as misclassified
+      ÔêÜ flags NIC in Tier 6 as misclassified
+      ÔêÜ does NOT flag Holiday Inn as employee holiday pay (1 ms)
+      ├ù warns when employee wages exceed ┬ú800 threshold (2 ms)
+  Prescribed Part Calculation
+    calculatePrescribedPart
+      ├ù ┬ú10,000 net ÔåÆ ┬ú5,000 (50%) (1 ms)
+      ├ù ┬ú5,000 net ÔåÆ ┬ú2,500 (50%) (1 ms)
+      ├ù ┬ú450,000 net ÔåÆ ┬ú93,000 (formula) (1 ms)
+      ├ù Large amount capped at ┬ú800,000 (post April 2020) (1 ms)
+      ├ù Large amount capped at ┬ú600,000 (pre April 2020)
+      ├ù Exactly April 6, 2020 uses new ┬ú800,000 cap
+      ├ù April 5, 2020 uses old ┬ú600,000 cap (1 ms)
+      ├ù Zero net property ÔåÆ Zero prescribed part (1 ms)
+      ├ù Negative net property (costs exceed realisations)
+  Usage Limits (API)
+    Ôùï skipped 4th certificate returns 402 Payment Required
+
+  ÔùÅ Crown Preference Detection ÔÇ║ analyzeClassifications ÔÇ║ warns when employee wages exceed ┬ú800 threshold
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      174 |             expect(result.warnings.some(w =>
+      175 |                 w.reason?.includes('800') || w.message?.includes('800')
+    > 176 |             )).toBe(true);
+          |                ^
+      177 |         });
+      178 |     });
+      179 | });
+
+      at Object.<anonymous> (tests/airlock.test.ts:176:16)
+
+  ÔùÅ Prescribed Part Calculation ÔÇ║ calculatePrescribedPart ÔÇ║ ┬ú10,000 net ÔåÆ ┬ú5,000 (50%)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 5000
+    Received: undefined
+
+      183 |         test('┬ú10,000 net ÔåÆ ┬ú5,000 (50%)', () => {
+      184 |             const result = calculatePrescribedPart(10000, new Date('2024-01-01'));
+    > 185 |             expect(result.prescribedPart).toBe(5000);
+          |                                           ^
+      186 |         });
+      187 |
+      188 |         test('┬ú5,000 net ÔåÆ ┬ú2,500 (50%)', () => {
+
+      at Object.<anonymous> (tests/airlock.test.ts:185:43)
+
+  ÔùÅ Prescribed Part Calculation ÔÇ║ calculatePrescribedPart ÔÇ║ ┬ú5,000 net ÔåÆ ┬ú2,500 (50%)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 2500
+    Received: undefined
+
+      188 |         test('┬ú5,000 net ÔåÆ ┬ú2,500 (50%)', () => {
+      189 |             const result = calculatePrescribedPart(5000, new Date('2024-01-01'));
+    > 190 |             expect(result.prescribedPart).toBe(2500);
+          |                                           ^
+      191 |         });
+      192 |
+      193 |         test('┬ú450,000 net ÔåÆ ┬ú93,000 (formula)', () => {
+
+      at Object.<anonymous> (tests/airlock.test.ts:190:43)
+
+  ÔùÅ Prescribed Part Calculation ÔÇ║ calculatePrescribedPart ÔÇ║ ┬ú450,000 net ÔåÆ ┬ú93,000 (formula)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 93000
+    Received: undefined
+
+      194 |             // ┬ú5,000 + (┬ú440,000 ├ù 20%) = ┬ú5,000 + ┬ú88,000 = ┬ú93,000
+      195 |             const result = calculatePrescribedPart(450000, new Date('2024-01-01'));
+    > 196 |             expect(result.prescribedPart).toBe(93000);
+          |                                           ^
+      197 |         });
+      198 |
+      199 |         test('Large amount capped at ┬ú800,000 (post April 2020)', () => {
+
+      at Object.<anonymous> (tests/airlock.test.ts:196:43)
+
+  ÔùÅ Prescribed Part Calculation ÔÇ║ calculatePrescribedPart ÔÇ║ Large amount capped at ┬ú800,000 (post April 2020)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 800000
+    Received: undefined
+
+      199 |         test('Large amount capped at ┬ú800,000 (post April 2020)', () => {
+      200 |             const result = calculatePrescribedPart(5000000, new Date('2021-01-01'));
+    > 201 |             expect(result.prescribedPart).toBe(800000);
+          |                                           ^
+      202 |             expect(result.cap).toBe(800000);
+      203 |         });
+      204 |
+
+      at Object.<anonymous> (tests/airlock.test.ts:201:43)
+
+  ÔùÅ Prescribed Part Calculation ÔÇ║ calculatePrescribedPart ÔÇ║ Large amount capped at ┬ú600,000 (pre April 2020)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 600000
+    Received: undefined
+
+      205 |         test('Large amount capped at ┬ú600,000 (pre April 2020)', () => {
+      206 |             const result = calculatePrescribedPart(5000000, new Date('2019-01-01'));
+    > 207 |             expect(result.prescribedPart).toBe(600000);
+          |                                           ^
+      208 |             expect(result.cap).toBe(600000);
+      209 |         });
+      210 |
+
+      at Object.<anonymous> (tests/airlock.test.ts:207:43)
+
+  ÔùÅ Prescribed Part Calculation ÔÇ║ calculatePrescribedPart ÔÇ║ Exactly April 6, 2020 uses new ┬ú800,000 cap
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 800000
+    Received: undefined
+
+      211 |         test('Exactly April 6, 2020 uses new ┬ú800,000 cap', () => {
+      212 |             const result = calculatePrescribedPart(5000000, new Date('2020-04-06'));
+    > 213 |             expect(result.cap).toBe(800000);
+          |                                ^
+      214 |         });
+      215 |
+      216 |         test('April 5, 2020 uses old ┬ú600,000 cap', () => {
+
+      at Object.<anonymous> (tests/airlock.test.ts:213:32)
+
+  ÔùÅ Prescribed Part Calculation ÔÇ║ calculatePrescribedPart ÔÇ║ April 5, 2020 uses old ┬ú600,000 cap
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 600000
+    Received: undefined
+
+      216 |         test('April 5, 2020 uses old ┬ú600,000 cap', () => {
+      217 |             const result = calculatePrescribedPart(5000000, new Date('2020-04-05'));
+    > 218 |             expect(result.cap).toBe(600000);
+          |                                ^
+      219 |         });
+      220 |
+      221 |         test('Zero net property ÔåÆ Zero prescribed part', () => {
+
+      at Object.<anonymous> (tests/airlock.test.ts:218:32)
+
+  ÔùÅ Prescribed Part Calculation ÔÇ║ calculatePrescribedPart ÔÇ║ Zero net property ÔåÆ Zero prescribed part
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: undefined
+
+      221 |         test('Zero net property ÔåÆ Zero prescribed part', () => {
+      222 |             const result = calculatePrescribedPart(0, new Date('2024-01-01'));
+    > 223 |             expect(result.prescribedPart).toBe(0);
+          |                                           ^
+      224 |         });
+      225 |
+      226 |         test('Negative net property (costs exceed realisations)', () => {
+
+      at Object.<anonymous> (tests/airlock.test.ts:223:43)
+
+  ÔùÅ Prescribed Part Calculation ÔÇ║ calculatePrescribedPart ÔÇ║ Negative net property (costs exceed realisations)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: undefined
+
+      226 |         test('Negative net property (costs exceed realisations)', () => {
+      227 |             const result = calculatePrescribedPart(-10000, new Date('2024-01-01'));
+    > 228 |             expect(result.prescribedPart).toBe(0);
+          |                                           ^
+      229 |         });
+      230 |     });
+      231 | });
+
+      at Object.<anonymous> (tests/airlock.test.ts:228:43)
+
+Test Suites: 1 failed, 1 total
+Tests:       10 failed, 1 skipped, 21 passed, 32 total
+Snapshots:   0 total
+Time:        0.482 s, estimated 1 s
+Ran all test suites.

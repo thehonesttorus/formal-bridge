@@ -73,6 +73,37 @@ export default function Expertise() {
                             </p>
                         </motion.blockquote>
 
+                        {/* Proof in Code - The Lean Theorem */}
+                        <motion.div
+                            className="bg-midnight border border-slate-800/50 rounded-lg overflow-hidden"
+                            initial={{ opacity: 0 }}
+                            animate={isInView ? { opacity: 1 } : {}}
+                            transition={{ delay: 0.6 }}
+                        >
+                            <div className="px-4 py-2 bg-slate-900/50 border-b border-slate-800/50 flex items-center justify-between">
+                                <span className="text-xs font-mono text-teal tracking-wide">
+                                    ACTUAL LEAN 4 CODE
+                                </span>
+                                <span className="text-xs text-slate-600 font-mono">
+                                    InsolvencyLib/PrescribedPart.lean
+                                </span>
+                            </div>
+                            <pre className="p-4 text-xs font-mono text-slate-400 overflow-x-auto">
+                                <code>{`/-- The prescribed part never exceeds
+    the statutory cap (CRITICAL BUSINESS PROOF) --/
+theorem prescribedPart_le_cap (np d) :
+    (calculatePrescribedPart np d).pence
+      ≤ (prescribedPartCap d).pence := by
+  ... -- Lean verifies this automatically`}</code>
+                            </pre>
+                            <div className="px-4 py-3 bg-teal/5 border-t border-teal/20">
+                                <p className="text-xs text-slate-400">
+                                    <span className="text-teal font-medium">What this means for you:</span>
+                                    {" "}This theorem mathematically guarantees that your prescribed part calculation
+                                    can never exceed the statutory cap—eliminating personal liability risk.
+                                </p>
+                            </div>
+                        </motion.div>
 
                     </motion.div>
 

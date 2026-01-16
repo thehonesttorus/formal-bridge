@@ -31,20 +31,24 @@ export default function BridgeAnimation({ width = "100%", height = 500 }: Bridge
     }, []);
 
     // --- CHAOS STAGE: Floating data icons converging toward center (gentler flow) ---
+    // Use deterministic rotation values to prevent hydration mismatch
+    const getRotation = (index: number) => ((index * 7) % 20) - 10; // Deterministic: -10 to +10
+    const getYOffset = (index: number) => ((index * 3) % 20) - 10; // Deterministic: -10 to +10
+
     const chaosItemVariants = {
-        hidden: (custom: { startX: number; startY: number }) => ({
+        hidden: (custom: { startX: number; startY: number; index: number }) => ({
             opacity: 0,
             x: custom.startX,
             y: custom.startY,
             scale: 0.6,
-            rotate: Math.random() * 20 - 10,
+            rotate: getRotation(custom.index),
         }),
-        visible: (custom: { startX: number; startY: number; delay: number; endX: number; endY: number; duration: number }) => ({
+        visible: (custom: { startX: number; startY: number; delay: number; endX: number; endY: number; duration: number; index: number }) => ({
             opacity: [0, 0.8, 0.8, 0],
             x: [custom.startX, custom.startX + 100, custom.endX],
-            y: [custom.startY, custom.startY + (Math.random() - 0.5) * 20, custom.endY],
+            y: [custom.startY, custom.startY + getYOffset(custom.index), custom.endY],
             scale: [0.6, 0.9, 0.3],
-            rotate: [Math.random() * 20 - 10, 0, 0],
+            rotate: [getRotation(custom.index), 0, 0],
             transition: {
                 delay: custom.delay,
                 duration: custom.duration || 4,
@@ -272,6 +276,7 @@ export default function BridgeAnimation({ width = "100%", height = 500 }: Bridge
                                         duration: item.duration,
                                         endX: centerX,
                                         endY: centerY,
+                                        index: i, // Pass index for deterministic rotation
                                     }}
                                     variants={chaosItemVariants}
                                     initial="hidden"

@@ -15,24 +15,37 @@ export default function Navbar() {
     const [user, setUser] = useState<{ email: string } | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-    const supabase = createClient();
 
     // Check auth state on mount
     useEffect(() => {
-        const checkUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user ? { email: user.email || '' } : null);
-            setLoading(false);
+        let subscription: { unsubscribe: () => void } | null = null;
+
+        const initAuth = async () => {
+            try {
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
+                setUser(user ? { email: user.email || '' } : null);
+                setLoading(false);
+
+                // Listen for auth changes
+                const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+                    setUser(session?.user ? { email: session.user.email || '' } : null);
+                });
+                subscription = data.subscription;
+            } catch (err) {
+                console.error('Failed to initialize auth:', err);
+                setLoading(false);
+            }
         };
-        checkUser();
 
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ? { email: session.user.email || '' } : null);
-        });
+        initAuth();
 
-        return () => subscription.unsubscribe();
-    }, [supabase.auth]);
+        return () => {
+            if (subscription) {
+                subscription.unsubscribe();
+            }
+        };
+    }, []);
 
     useMotionValueEvent(scrollY, "change", (latest) => {
         setIsScrolled(latest > 50);
@@ -41,9 +54,14 @@ export default function Navbar() {
     const replayLogo = () => setLogoKey(prev => prev + 1);
 
     const handleSignOut = async () => {
-        await supabase.auth.signOut();
-        setUser(null);
-        router.push('/');
+        try {
+            const supabase = createClient();
+            await supabase.auth.signOut();
+            setUser(null);
+            router.push('/');
+        } catch (err) {
+            console.error('Failed to sign out:', err);
+        }
     };
 
     return (

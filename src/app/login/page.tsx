@@ -16,24 +16,29 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
     const router = useRouter();
-    const supabase = createClient();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+        try {
+            const supabase = createClient();
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-        if (error) {
-            setError(error.message);
+            if (error) {
+                setError(error.message);
+                setLoading(false);
+            } else {
+                router.push('/portal');
+                router.refresh();
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to sign in');
             setLoading(false);
-        } else {
-            router.push('/portal');
-            router.refresh();
         }
     };
 
@@ -45,17 +50,22 @@ export default function LoginPage() {
         setMagicLinkLoading(true);
         setError(null);
 
-        const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-                emailRedirectTo: `${window.location.origin}/auth/callback`,
-            },
-        });
+        try {
+            const supabase = createClient();
+            const { error } = await supabase.auth.signInWithOtp({
+                email,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/auth/callback`,
+                },
+            });
 
-        if (error) {
-            setError(error.message);
-        } else {
-            setMessage('Check your email for a magic link to sign in.');
+            if (error) {
+                setError(error.message);
+            } else {
+                setMessage('Check your email for a magic link to sign in.');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to send magic link');
         }
         setMagicLinkLoading(false);
     };
